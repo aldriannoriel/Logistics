@@ -4,7 +4,7 @@ This folder contains the Laravel application for the Logistics Courier project: 
 
 ## Requirements
 
-- PHP 8.3 or later with PDO MySQL enabled
+- PHP 8.3 or later with the `pdo_mysql`, `pdo_sqlite`, `gd`, and `intl` extensions enabled
 - Composer
 - MySQL 8 or compatible
 - Node.js and npm (use a current Node.js LTS release)
@@ -53,7 +53,7 @@ Run the Laravel feature and unit tests with:
 php artisan test
 ```
 
-The test configuration uses SQLite in memory, so PHP must have the `pdo_sqlite` extension enabled in addition to `pdo_mysql`.
+The test configuration uses SQLite in memory, so PHP must have the `pdo_sqlite` extension enabled. The test suite also uses `gd` for image fixtures. Keep `pdo_mysql` enabled for the application database; `intl` is required by Laravel's number-formatting utilities.
 
 ## Main Laravel folders
 

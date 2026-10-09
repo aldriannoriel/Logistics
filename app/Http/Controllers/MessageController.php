@@ -134,8 +134,7 @@ class MessageController extends Controller
                     ->where('sorting_center_id', $centerId)
                     ->whereHas('participants', fn (Builder $query) => $query->whereKey($user->id))
                     ->whereHas('participants', fn (Builder $query) => $query->whereKey($recipientId))
-                    ->withCount('participants')
-                    ->having('participants_count', 2)
+                    ->has('participants', '=', 2)
                     ->first();
 
                 if (!$conversation) {

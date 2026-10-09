@@ -108,6 +108,8 @@ class ConversationMessagingTest extends TestCase
             'sorting_center_id' => $center->id,
             'name' => 'Test Rider',
             'contact' => '09170000000',
+            'vehicle_type' => 'motorcycle',
+            'plate_number' => 'TEST-777',
             'approval_status' => 'approved',
             'is_active' => true,
         ]);
