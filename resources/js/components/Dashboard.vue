@@ -1,36 +1,37 @@
 ﻿<template>
   <sc-layout title="Dashboard">
     <div class="app-page-shell">
-      <div v-if="!token" class="app-panel app-panel--padded" style="padding: 2rem; text-align: center;">
-        <h2 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--app-text);">Authentication required</h2>
-        <p style="margin-top: 0.75rem; color: var(--app-text-muted);">Log in with an approved sorting center account to view the dashboard.</p>
-        <a href="/login" class="app-button-primary" style="margin-top: 1.25rem;">Go to login</a>
+      <div v-if="!token" class="app-panel app-empty-state">
+        <h2 class="app-section-title">Authentication required</h2>
+        <p>Log in with an approved sorting center account to view the dashboard.</p>
+        <a href="/sorting-center/login" class="app-button-primary" >Go to login</a>
       </div>
 
       <template v-else>
-        <div v-if="feedback.message" class="app-panel app-panel--padded" style="padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;" role="status">
+        <div v-if="feedback.message" class="app-feedback" role="status">
           <span>{{ feedback.message }}</span>
-          <button type="button" class="app-button-secondary" style="padding: 0.5rem 0.75rem;" @click="feedback.message = ''">Close</button>
+          <button type="button" class="app-button-secondary"  @click="feedback.message = ''">Close</button>
         </div>
 
-        <div class="app-panel app-panel--padded" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+        <div class="app-panel app-panel--padded app-toolbar">
           <div>
-            <h2 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--app-text);">Overview & Operations</h2>
-            <p style="margin: 0.5rem 0 0; color: var(--app-text-muted); font-size: 0.92rem;">A real-time snapshot of work waiting for your team.</p>
+            <p class="app-eyebrow">Operations overview</p>
+            <h2 class="app-section-title">Your queue at a glance</h2>
+            <p class="app-description">Refresh to see the latest work waiting for your team.</p>
           </div>
-          <button type="button" :disabled="loading" class="app-button-primary" @click="loadDashboard">
+          <button type="button" :disabled="loading" class="app-button-secondary" @click="loadDashboard">
             {{ loading ? 'Refreshing...' : 'Refresh' }}
           </button>
         </div>
 
-        <div v-if="loading && !hasLoaded" class="app-panel app-panel--padded" style="padding: 3rem 1.5rem; text-align: center;">
-          <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#0D7377]" style="margin: 0 auto;"></div>
-          <p style="margin-top: 1rem; color: var(--app-text-muted);">Loading dashboard...</p>
+        <div v-if="loading && !hasLoaded" class="app-panel app-empty-state">
+          <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#0D7377]" ></div>
+          <p >Loading dashboard...</p>
         </div>
 
-        <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          <a v-for="card in cards" :key="card.key" :href="card.href" class="app-card group" style="display: block; text-decoration: none; color: inherit;">
-            <div style="min-width: 0;">
+        <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <a v-for="card in cards" :key="card.key" :href="card.href" class="app-card group" >
+            <div >
               <span class="app-card__label">{{ card.label }}</span>
               <span class="app-card__value">{{ counts[card.key] }}</span>
             </div>

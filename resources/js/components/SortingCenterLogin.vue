@@ -1,17 +1,17 @@
 <template>
-    <div class="min-h-screen bg-[#F5F5F5] flex items-center justify-center px-4 py-12">
-        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div class="app-auth-shell">
+        <div class="w-full max-w-md overflow-hidden app-panel app-auth-card">
             <!-- Header -->
-            <div class="bg-[#008B8B] px-8 py-7">
+            <div class="app-auth-header">
                 <img :src="logoUrl" alt="Alona" class="mx-auto mb-3 h-10 w-10 object-contain" />
-                <h1 class="text-2xl font-bold text-white text-center">Sorting Center Login</h1>
-                <p class="text-indigo-100 text-center mt-2 text-sm">Access your sorting center portal and shipments</p>
+                <h1 class="app-auth-title">Sorting Center Login</h1>
+                <p class="app-description text-center">Access your sorting center portal and shipments</p>
             </div>
 
             <!-- Login Form (Visible when not logged in) -->
-            <form v-if="!authData" @submit.prevent="handleLogin" class="p-8 space-y-6">
+            <form v-if="!authData" @submit.prevent="handleLogin" class="p-6 space-y-4">
                 <!-- General Error Banner -->
-                <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700 flex items-start">
+                <div v-if="errorMessage" class="app-feedback app-feedback--error">
                     <span>{{ errorMessage }}</span>
                 </div>
 
@@ -26,7 +26,7 @@
                         type="email"
                         required
                         autocomplete="email"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-gray-900 placeholder-gray-400"
+                        class="w-full placeholder-gray-400 app-input"
                         placeholder="you@sortingcenter.com"
                         :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': fieldErrors.email }"
                         @input="clearFieldError('email')"
@@ -45,7 +45,7 @@
                         type="password"
                         required
                         autocomplete="current-password"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-gray-900 placeholder-gray-400"
+                        class="w-full placeholder-gray-400 app-input"
                         placeholder="Enter your password"
                         :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': fieldErrors.password }"
                         @input="clearFieldError('password')"
@@ -57,7 +57,7 @@
                 <button
                     type="submit"
                     :disabled="loading"
-                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-[#FFA500] hover:bg-[#E69500] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    class="w-full flex justify-center border border-transparent text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-300 disabled:opacity-50 disabled:cursor-not-allowed app-button-primary"
                 >
                     <span v-if="loading" class="flex items-center">
                         Signing in...
@@ -68,14 +68,14 @@
                 <!-- Navigation link to Register -->
                 <div class="pt-2 text-center text-sm text-gray-600">
                     Don't have an account yet?
-                    <a href="/register" class="font-medium text-indigo-600 hover:text-indigo-500 ml-1 transition">
+                    <a href="/register" class="font-medium text-[var(--app-primary)] hover:text-[var(--app-primary-dark)] ml-1 transition">
                         Register your sorting center
                     </a>
                 </div>
             </form>
 
             <!-- Status State 1: PENDING -->
-            <div v-else-if="authData.approval_status === 'pending'" class="p-8 text-center">
+            <div v-else-if="authData.approval_status === 'pending'" class="p-6 text-center">
                 <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 mb-4">
                     <span class="text-sm font-semibold text-amber-600">Pending</span>
                 </div>
@@ -109,7 +109,7 @@
             </div>
 
             <!-- Status State 3: REJECTED -->
-            <div v-else-if="authData.approval_status === 'rejected'" class="p-8 text-center">
+            <div v-else-if="authData.approval_status === 'rejected'" class="p-6 text-center">
                 <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
                     <span class="text-sm font-semibold text-red-600">Rejected</span>
                 </div>
@@ -123,7 +123,7 @@
 
                 <div class="bg-gray-50 rounded-lg p-4 mb-6 text-sm text-gray-600 text-left">
                     <p class="font-medium text-gray-900 mb-1">Need assistance?</p>
-                    <p>Please contact our support team at <strong class="text-indigo-600">support@logistics.com</strong> with your business registration details.</p>
+                    <p>Please contact our support team at <strong class="text-[var(--app-primary)]">support@logistics.com</strong> with your business registration details.</p>
                 </div>
 
                 <button

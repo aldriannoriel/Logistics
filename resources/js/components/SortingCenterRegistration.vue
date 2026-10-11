@@ -1,15 +1,15 @@
 <template>
-    <div class="min-h-screen bg-[#F5F5F5] flex items-center justify-center px-4 py-12">
-        <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div class="app-auth-shell">
+        <div class="w-full max-w-lg overflow-hidden app-panel app-auth-card">
             <!-- Header -->
-            <div class="bg-[#008B8B] px-8 py-7">
+            <div class="app-auth-header">
                 <img :src="logoUrl" alt="Alona" class="mx-auto mb-3 h-[60px] w-[60px] object-contain" />
-                <h1 class="text-2xl font-bold text-white text-center">Sorting Center Registration</h1>
-                <p class="text-indigo-100 text-center mt-2 text-sm">Register your sorting center to start processing shipments</p>
+                <h1 class="app-auth-title">Sorting Center Registration</h1>
+                <p class="app-description text-center">Register your sorting center to start processing shipments</p>
             </div>
 
             <!-- Form -->
-            <form v-if="!submitted" @submit.prevent="handleSubmit" class="p-8 space-y-6">
+            <form v-if="!submitted" @submit.prevent="handleSubmit" class="p-6 space-y-4">
                 <!-- Business Name -->
                 <div>
                     <label for="business_name" class="block text-sm font-medium text-gray-700 mb-1">
@@ -19,7 +19,7 @@
                         id="business_name"
                         v-model="form.business_name"
                         type="text"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-gray-900 placeholder-gray-400"
+                        class="w-full placeholder-gray-400 app-input"
                         placeholder="Your business/legal entity name"
                         :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.business_name }"
                         @blur="touchField('business_name')"
@@ -36,7 +36,7 @@
                         id="email"
                         v-model="form.email"
                         type="email"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-gray-900 placeholder-gray-400"
+                        class="w-full placeholder-gray-400 app-input"
                         placeholder="you@sortingcenter.com"
                         :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.email }"
                         @blur="touchField('email')"
@@ -53,7 +53,7 @@
                         id="password"
                         v-model="form.password"
                         type="password"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-gray-900 placeholder-gray-400"
+                        class="w-full placeholder-gray-400 app-input"
                         placeholder="Minimum 8 characters"
                         :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.password }"
                         @blur="touchField('password')"
@@ -70,7 +70,7 @@
                         id="password_confirmation"
                         v-model="form.password_confirmation"
                         type="password"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-gray-900 placeholder-gray-400"
+                        class="w-full placeholder-gray-400 app-input"
                         placeholder="Re-enter your password"
                         :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.password_confirmation }"
                         @blur="touchField('password_confirmation')"
@@ -85,14 +85,14 @@
                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-orange-400 border-dashed rounded-lg cursor-pointer hover:border-orange-500 transition" :class="{ 'border-red-500 bg-red-50': errors.id_doc }">
                         <div class="space-y-1 text-center">
                             <div class="flex text-sm text-gray-600">
-                                <label for="id_doc" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
+                                <label for="id_doc" class="relative cursor-pointer rounded-md font-medium text-[var(--app-primary)] hover:text-[var(--app-primary-dark)] focus-within:outline-none">
                                     <span>Upload a file</span>
-                                    <input id="id_doc" ref="idDocInput" type="file" class="sr-only" accept="image/*,.pdf" @change="onFileSelect('id_doc', $event)" />
+                                    <input id="id_doc" ref="idDocInput" type="file" class="sr-only app-input" accept="image/*,.pdf" @change="onFileSelect('id_doc', $event)" />
                                 </label>
                                 <p class="pl-1">or drag and drop</p>
                             </div>
-                            <p class="text-xs text-gray-500">JPG, PNG, or PDF — Max 5MB</p>
-                            <p v-if="form.id_doc" class="text-xs text-indigo-600 font-medium mt-1">{{ form.id_doc.name }}</p>
+                            <p class="text-xs text-[var(--app-text-muted)]">JPG, PNG, or PDF — Max 5MB</p>
+                            <p v-if="form.id_doc" class="text-xs text-[var(--app-primary)] font-medium mt-1">{{ form.id_doc.name }}</p>
                         </div>
                     </div>
                     <p v-if="errors.id_doc" class="mt-1 text-sm text-red-600">{{ errors.id_doc[0] }}</p>
@@ -106,14 +106,14 @@
                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-orange-400 border-dashed rounded-lg cursor-pointer hover:border-orange-500 transition" :class="{ 'border-red-500 bg-red-50': errors.permit_doc }">
                         <div class="space-y-1 text-center">
                             <div class="flex text-sm text-gray-600">
-                                <label for="permit_doc" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
+                                <label for="permit_doc" class="relative cursor-pointer rounded-md font-medium text-[var(--app-primary)] hover:text-[var(--app-primary-dark)] focus-within:outline-none">
                                     <span>Upload a file</span>
-                                    <input id="permit_doc" ref="permitDocInput" type="file" class="sr-only" accept="image/*,.pdf" @change="onFileSelect('permit_doc', $event)" />
+                                    <input id="permit_doc" ref="permitDocInput" type="file" class="sr-only app-input" accept="image/*,.pdf" @change="onFileSelect('permit_doc', $event)" />
                                 </label>
                                 <p class="pl-1">or drag and drop</p>
                             </div>
-                            <p class="text-xs text-gray-500">JPG, PNG, or PDF — Max 5MB</p>
-                            <p v-if="form.permit_doc" class="text-xs text-indigo-600 font-medium mt-1">{{ form.permit_doc.name }}</p>
+                            <p class="text-xs text-[var(--app-text-muted)]">JPG, PNG, or PDF — Max 5MB</p>
+                            <p v-if="form.permit_doc" class="text-xs text-[var(--app-primary)] font-medium mt-1">{{ form.permit_doc.name }}</p>
                         </div>
                     </div>
                     <p v-if="errors.permit_doc" class="mt-1 text-sm text-red-600">{{ errors.permit_doc[0] }}</p>
@@ -128,7 +128,7 @@
                 <button
                     type="submit"
                     :disabled="loading"
-                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-[#FFA500] hover:bg-[#E69500] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    class="w-full flex justify-center border border-transparent text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-300 disabled:opacity-50 disabled:cursor-not-allowed app-button-primary"
                 >
                     <span v-if="loading" class="flex items-center">
                         Submitting...
@@ -139,14 +139,14 @@
                 <!-- Navigation link to Login -->
                 <div class="pt-2 text-center text-sm text-gray-600">
                     Already have an account?
-                    <a href="/login" class="font-medium text-indigo-600 hover:text-indigo-500 ml-1 transition">
+                    <a href="/login" class="font-medium text-[var(--app-primary)] hover:text-[var(--app-primary-dark)] ml-1 transition">
                         Log in here
                     </a>
                 </div>
             </form>
 
             <!-- Success State -->
-            <div v-else class="p-8 text-center">
+            <div v-else class="p-6 text-center">
                 <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
                     <span class="text-sm font-semibold text-green-600">Submitted</span>
                 </div>
@@ -162,13 +162,13 @@
                 <div class="space-y-3">
                     <a
                         href="/login"
-                        class="block w-full py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-[#FFA500] hover:bg-[#E69500] transition text-center"
+                        class="block w-full border border-transparent text-sm font-semibold text-center app-button-primary"
                     >
                         Go to Login
                     </a>
                     <button
                         @click="resetForm"
-                        class="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition"
+                        class="text-sm font-medium text-[var(--app-primary)] hover:text-[var(--app-primary-dark)] transition"
                     >
                         Register another sorting center
                     </button>

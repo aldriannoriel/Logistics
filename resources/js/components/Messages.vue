@@ -1,30 +1,30 @@
 <template>
   <sc-layout title="Messages">
-    <div class="space-y-6">
-      <div v-if="!token" class="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center shadow-sm">
-        <h2 class="text-lg font-bold text-amber-950">Authentication required</h2>
+    <div class="app-page-shell">
+      <div v-if="!token" class="app-panel app-empty-state">
+        <h2 class="text-amber-950 app-section-title">Authentication required</h2>
         <p class="mt-2 text-sm text-amber-800">Log in with an approved sorting center account to access messages.</p>
-        <a href="/login" class="mt-5 inline-flex rounded-lg bg-[#FFA500] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#E69500] shadow-sm">
+        <a href="/sorting-center/login" class="mt-5 inline-flex app-button-primary">
           Go to login
         </a>
       </div>
 
       <template v-else>
-        <div class="flex flex-col gap-4 rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#008B8B] bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between app-panel app-panel--padded app-toolbar">
           <div>
-            <h2 class="text-xl font-bold text-[#008B8B]">Sorting Center Communications</h2>
+            <h2 class="app-section-title">Sorting Center Communications</h2>
             <p class="mt-1 text-sm text-gray-600">Message approved riders connected to this sorting center.</p>
           </div>
           <button
             type="button"
-            class="rounded-lg bg-[#FFA500] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#E69500] shadow-sm"
+            class="app-button-primary"
             @click="composeMessage"
           >
             New Message
           </button>
         </div>
 
-        <div v-if="errorMessage" class="rounded-lg border border-red-200 bg-red-50 px-5 py-3 text-sm text-red-800" role="alert">
+        <div v-if="errorMessage" class="app-feedback app-feedback--error" role="alert">
           {{ errorMessage }}
         </div>
 
@@ -37,11 +37,11 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="new-message-title"
-            class="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl"
+            class="w-full max-w-lg app-panel app-panel--padded"
           >
             <div class="flex items-start justify-between gap-4">
               <div>
-                <h2 id="new-message-title" class="text-xl font-bold text-[#008B8B]">New message</h2>
+                <h2 id="new-message-title" class="app-section-title">New message</h2>
                 <p class="mt-1 text-sm text-gray-600">Start a conversation with an approved rider from your sorting center.</p>
               </div>
               <button
@@ -66,7 +66,7 @@
                   v-model="selectedRecipientId"
                   required
                   :disabled="loadingRecipients || recipients.length === 0"
-                  class="mt-1 block w-full rounded-lg border border-[#DCE7E2] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#008B8B] focus:ring-2 focus:ring-[#008B8B]/20 disabled:bg-gray-100"
+                  class="mt-1 block w-full disabled:bg-gray-100 app-input"
                 >
                   <option value="">
                     {{ loadingRecipients ? 'Loading riders...' : 'Choose a rider' }}
@@ -89,13 +89,13 @@
                   maxlength="4000"
                   rows="4"
                   placeholder="Write your message..."
-                  class="mt-1 block w-full resize-y rounded-lg border border-[#DCE7E2] bg-white px-4 py-3 text-sm outline-none focus:border-[#008B8B] focus:ring-2 focus:ring-[#008B8B]/20"
+                  class="mt-1 block w-full resize-y app-input"
                 ></textarea>
               </label>
               <div class="flex justify-end gap-3">
                 <button
                   type="button"
-                  class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                  class="text-gray-700 app-button-secondary"
                   @click="closeComposer"
                 >
                   Cancel
@@ -103,7 +103,7 @@
                 <button
                   type="submit"
                   :disabled="sending || loadingRecipients || !selectedRecipientId || !newMsg.trim()"
-                  class="rounded-lg bg-[#FFA500] px-5 py-2 text-sm font-bold text-white hover:bg-[#E69500] disabled:opacity-50"
+                  class="disabled:opacity-50 app-button-primary"
                 >
                   {{ sending ? 'Sending...' : 'Send message' }}
                 </button>
@@ -112,21 +112,21 @@
           </section>
         </div>
 
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <section class="flex flex-col overflow-hidden rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#008B8B] bg-white shadow-sm">
-            <div class="border-b border-[#DCE7E2] bg-gray-50/70 p-4">
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <section class="flex flex-col overflow-hidden app-panel">
+            <div class="border-b border-[var(--app-border)] bg-gray-50/70 p-4">
               <input
                 v-model="searchQuery"
                 type="search"
                 placeholder="Search conversations..."
-                class="w-full rounded-lg border border-[#DCE7E2] bg-white px-3 py-2 text-sm outline-none focus:border-[#008B8B] focus:ring-2 focus:ring-[#008B8B]/20"
+                class="w-full app-input"
               />
             </div>
             <div v-if="loadingConversations" class="p-6 text-sm text-gray-500">Loading conversations...</div>
             <div v-else-if="filteredConversations.length === 0" class="p-6 text-sm text-gray-500">
               No conversations yet. Start a message with an approved rider.
             </div>
-            <div v-else class="max-h-[500px] divide-y divide-[#DCE7E2] overflow-y-auto">
+            <div v-else class="max-h-[420px] divide-y divide-[#DCE7E2] overflow-y-auto">
               <button
                 v-for="conv in filteredConversations"
                 :key="conv.id"
@@ -136,12 +136,12 @@
                 @click="openConversation(conv.id)"
               >
                 <span class="flex min-w-0 items-center gap-3">
-                  <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#008B8B] text-sm font-bold text-white">
+                  <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--app-primary)] text-sm font-bold text-white">
                     {{ initials(conv.recipient?.name) }}
                   </span>
                   <span class="min-w-0">
                     <span class="block truncate text-sm font-bold text-[#333333]">{{ conv.recipient?.name || 'Account' }}</span>
-                    <span class="block truncate text-xs text-gray-500">{{ conv.latest_message?.body || 'No messages' }}</span>
+                    <span class="block truncate text-xs text-[var(--app-text-muted)]">{{ conv.latest_message?.body || 'No messages' }}</span>
                   </span>
                 </span>
                 <span class="shrink-0 text-right">
@@ -154,15 +154,15 @@
             </div>
           </section>
 
-          <section class="flex min-h-[500px] flex-col justify-between rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#008B8B] bg-white shadow-sm lg:col-span-2">
-            <div class="flex items-center justify-between border-b border-[#DCE7E2] bg-gray-50/70 p-4">
+          <section class="flex min-h-[420px] flex-col justify-between lg:col-span-2 app-panel">
+            <div class="flex items-center justify-between border-b border-[var(--app-border)] bg-gray-50/70 p-4">
               <div class="flex items-center gap-3">
-                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#008B8B] text-sm font-bold text-white">
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--app-primary)] text-sm font-bold text-white">
                   {{ initials(activeConversation?.recipient?.name) }}
                 </span>
                 <div>
-                  <h3 class="text-base font-bold text-[#333333]">{{ activeConversation?.recipient?.name || 'Select a conversation' }}</h3>
-                  <p class="text-xs capitalize text-gray-500">{{ activeConversation?.recipient?.role?.replaceAll('_', ' ') || 'Direct message' }}</p>
+                  <h3 class="app-section-title">{{ activeConversation?.recipient?.name || 'Select a conversation' }}</h3>
+                  <p class="text-xs capitalize text-[var(--app-text-muted)]">{{ activeConversation?.recipient?.role?.replaceAll('_', ' ') || 'Direct message' }}</p>
                 </div>
               </div>
             </div>
@@ -191,19 +191,19 @@
               </div>
             </div>
 
-            <form v-if="!composing" class="flex flex-col gap-3 border-t border-[#DCE7E2] bg-gray-50/50 p-4 sm:flex-row" @submit.prevent="sendMessage">
+            <form v-if="!composing" class="flex flex-col gap-3 border-t border-[var(--app-border)] bg-gray-50/50 p-4 sm:flex-row" @submit.prevent="sendMessage">
               <input
                 v-model="newMsg"
                 type="text"
                 maxlength="4000"
                 :disabled="!selectedConvId"
                 placeholder="Type your message..."
-                class="min-w-0 flex-1 rounded-lg border border-[#DCE7E2] bg-white px-4 py-2.5 text-sm text-[#333333] outline-none focus:border-[#008B8B] focus:ring-2 focus:ring-[#008B8B]/20 disabled:bg-gray-100"
+                class="min-w-0 flex-1 disabled:bg-gray-100 app-input"
               />
               <button
                 type="submit"
                 :disabled="sending || !selectedConvId || !newMsg.trim()"
-                class="rounded-lg bg-[#FFA500] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#E69500] disabled:opacity-50"
+                class="disabled:opacity-50 app-button-primary"
               >
                 {{ sending ? 'Sending...' : 'Send' }}
               </button>

@@ -1,11 +1,11 @@
 <template>
   <sc-layout title="Delivery Monitoring">
-    <div class="space-y-6">
+    <div class="app-page-shell">
       <!-- Unauthenticated State -->
-      <div v-if="!token" class="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center shadow-sm">
-        <h2 class="text-lg font-bold text-amber-950">Authentication required</h2>
+      <div v-if="!token" class="app-panel app-empty-state">
+        <h2 class="text-amber-950 app-section-title">Authentication required</h2>
         <p class="mt-2 text-sm text-amber-800">Log in with an approved sorting center account to monitor parcels.</p>
-        <a href="/login" class="mt-5 inline-flex rounded-lg bg-[#FFA500] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#E69500] shadow-sm">
+        <a href="/sorting-center/login" class="mt-5 inline-flex app-button-primary">
           Go to login
         </a>
       </div>
@@ -14,8 +14,8 @@
         <!-- Feedback Banner -->
         <div
           v-if="feedback.message"
-          :class="feedback.type === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-red-200 bg-red-50 text-red-800'"
-          class="flex items-center justify-between rounded-lg border px-5 py-3 text-sm shadow-sm"
+          :class="feedback.type === 'success' ? 'app-feedback--success' : 'app-feedback--error'"
+          class="app-feedback"
           role="status"
         >
           <span>{{ feedback.message }}</span>
@@ -23,12 +23,12 @@
         </div>
 
         <!-- Filter & Search Bar -->
-        <div class="flex flex-col gap-4 rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#008B8B] bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between app-panel app-panel--padded app-toolbar">
           <div>
             <p class="text-sm font-semibold text-gray-600">Tracked Parcels in Workflow</p>
             <div class="mt-1 flex items-baseline gap-2">
-              <span class="text-3xl font-bold text-[#008B8B]">{{ pagination.total }}</span>
-              <span class="text-xs text-gray-500 font-medium">total matching filters</span>
+              <span class="text-3xl font-bold text-[var(--app-primary)]">{{ pagination.total }}</span>
+              <span class="text-xs text-[var(--app-text-muted)] font-medium">total matching filters</span>
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-3">
@@ -37,7 +37,7 @@
               <select
                 id="status-filter"
                 v-model="selectedStatus"
-                class="rounded-lg border border-[#DCE7E2] bg-white px-3 py-2 text-sm text-[#333333] outline-none transition focus:border-[#008B8B] focus:ring-2 focus:ring-[#008B8B]/20"
+                class="app-input"
                 @change="loadParcels(1)"
               >
                 <option v-for="option in statusOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
@@ -46,7 +46,7 @@
             <button
               type="button"
               :disabled="loading"
-              class="rounded-lg bg-[#FFA500] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#E69500] disabled:opacity-50 shadow-sm active:scale-95"
+              class="disabled:opacity-50 app-button-secondary"
               @click="loadParcels(pagination.current_page)"
             >
               {{ loading ? 'Refreshing...' : 'Refresh' }}
@@ -55,32 +55,32 @@
         </div>
 
         <!-- Loading State -->
-        <div v-if="loading" class="rounded-xl border border-[#DCE7E2] bg-white px-6 py-16 text-center shadow-sm">
+        <div v-if="loading" class="text-center app-panel app-empty-state">
           <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#008B8B]"></div>
           <p class="mt-4 text-sm text-gray-500">Loading monitoring data...</p>
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="parcels.length === 0" class="rounded-xl border border-dashed border-[#DCE7E2] bg-white px-6 py-16 text-center shadow-sm">
+        <div v-else-if="parcels.length === 0" class="text-center app-panel app-empty-state">
           <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-sm font-semibold text-emerald-600">
             None
           </div>
-          <h2 class="mt-4 text-lg font-bold text-[#008B8B]">No Parcels Match This Filter</h2>
+          <h2 class="mt-4 app-section-title">No Parcels Match This Filter</h2>
           <p class="mt-2 text-sm text-gray-500">Try choosing another status filter or check back later.</p>
         </div>
 
         <!-- Parcels Table Card -->
-        <div v-else class="overflow-hidden rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#008B8B] bg-white shadow-sm">
+        <div v-else class="overflow-hidden app-panel">
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-[#DCE7E2] text-left text-sm">
-              <thead class="bg-[#008B8B] text-xs font-semibold uppercase tracking-wider text-white">
+            <table class="app-data-table">
+              <thead >
                 <tr>
-                  <th class="px-5 py-3.5">Order ID</th>
-                  <th class="px-5 py-3.5">Status</th>
-                  <th class="px-5 py-3.5">Delivery Destination</th>
-                  <th class="px-5 py-3.5">Sorting Area</th>
-                  <th class="px-5 py-3.5">Assigned Rider</th>
-                  <th class="px-5 py-3.5">Last Updated</th>
+                  <th scope="col" >Order ID</th>
+                  <th scope="col" >Status</th>
+                  <th scope="col" >Delivery Destination</th>
+                  <th scope="col" >Sorting Area</th>
+                  <th scope="col" >Assigned Rider</th>
+                  <th scope="col" >Last Updated</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-[#DCE7E2] bg-white">
@@ -90,37 +90,37 @@
                   :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50/70'"
                   class="transition hover:bg-teal-50/40"
                 >
-                  <td class="whitespace-nowrap px-5 py-4 font-mono font-bold text-[#008B8B]">{{ parcel.order_id }}</td>
-                  <td class="whitespace-nowrap px-5 py-4">
+                  <td class="whitespace-nowrap">{{ parcel.order_id }}</td>
+                  <td class="whitespace-nowrap">
                     <span :class="statusBadgeClass(parcel.status)" class="rounded-full px-3 py-1 text-xs font-bold shadow-xs">
                       {{ formatStatus(parcel.status) }}
                     </span>
                   </td>
-                  <td class="px-5 py-4 text-gray-700 font-medium">
+                  <td class="text-gray-700">
                     {{ parcel.delivery_municipality }} / {{ parcel.delivery_barangay }}
                   </td>
-                  <td class="whitespace-nowrap px-5 py-4 text-gray-700">
-                    <span v-if="parcel.sorted_area" class="font-semibold text-[#008B8B]">{{ parcel.sorted_area.name }}</span>
+                  <td class="whitespace-nowrap text-gray-700">
+                    <span v-if="parcel.sorted_area" class="font-semibold text-[var(--app-primary)]">{{ parcel.sorted_area.name }}</span>
                     <span v-else class="text-gray-400 italic">Not sorted</span>
                   </td>
-                  <td class="whitespace-nowrap px-5 py-4 text-gray-700">
+                  <td class="whitespace-nowrap text-gray-700">
                     <span v-if="parcel.assigned_rider" class="font-semibold text-gray-900">{{ parcel.assigned_rider.name }}</span>
                     <span v-else class="text-gray-400 italic">Unassigned</span>
                   </td>
-                  <td class="whitespace-nowrap px-5 py-4 text-xs text-gray-500 font-medium">{{ formatDate(parcel.updated_at) }}</td>
+                  <td class="whitespace-nowrap text-gray-500">{{ formatDate(parcel.updated_at) }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <!-- Pagination Bar -->
-          <div class="flex flex-col sm:flex-row items-center justify-between border-t border-[#DCE7E2] px-6 py-4 text-sm bg-gray-50">
+          <div class="flex flex-col sm:flex-row items-center justify-between border-t border-[var(--app-border)] px-6 py-4 text-sm bg-gray-50">
             <p class="text-gray-600 font-medium">Page {{ pagination.current_page }} of {{ pagination.last_page }}</p>
             <div class="mt-2 sm:mt-0 flex gap-2">
               <button
                 type="button"
                 :disabled="!pagination.prev_page_url || loading"
-                class="rounded-lg border border-[#DCE7E2] bg-white px-4 py-2 font-semibold text-gray-700 hover:border-[#008B8B] hover:text-[#008B8B] disabled:cursor-not-allowed disabled:opacity-40 transition"
+                class="text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 app-button-secondary"
                 @click="loadParcels(pagination.current_page - 1)"
               >
                 Previous
@@ -128,7 +128,7 @@
               <button
                 type="button"
                 :disabled="!pagination.next_page_url || loading"
-                class="rounded-lg border border-[#DCE7E2] bg-white px-4 py-2 font-semibold text-gray-700 hover:border-[#008B8B] hover:text-[#008B8B] disabled:cursor-not-allowed disabled:opacity-40 transition"
+                class="text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 app-button-secondary"
                 @click="loadParcels(pagination.current_page + 1)"
               >
                 Next
@@ -207,7 +207,7 @@ export default {
     function statusBadgeClass(status) {
       return {
         AT_SORTING_CENTER: 'bg-teal-100 text-[#008B8B]',
-        OUT_FOR_DELIVERY: 'bg-orange-100 text-[#FFA500]',
+        OUT_FOR_DELIVERY: 'bg-orange-100 text-[var(--app-secondary)]',
         DELIVERED: 'bg-green-100 text-green-800',
         FAILED_RETURNED: 'bg-red-100 text-red-800',
         PICKED_UP: 'bg-blue-100 text-blue-800',

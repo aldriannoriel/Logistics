@@ -1,20 +1,20 @@
 <template>
   <sc-layout title="Delivery Reports">
-    <div class="space-y-6">
+    <div class="app-page-shell">
       <!-- Unauthenticated State -->
-      <div v-if="!token" class="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center shadow-sm">
-        <h2 class="text-lg font-bold text-amber-950">Authentication required</h2>
+      <div v-if="!token" class="app-panel app-empty-state">
+        <h2 class="text-amber-950 app-section-title">Authentication required</h2>
         <p class="mt-2 text-sm text-amber-800">Log in with an approved sorting center account to generate reports.</p>
-        <a href="/login" class="mt-5 inline-flex rounded-lg bg-[#FFA500] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#E69500] shadow-sm">
+        <a href="/sorting-center/login" class="mt-5 inline-flex app-button-primary">
           Go to login
         </a>
       </div>
 
       <template v-else>
         <!-- Filter Card -->
-        <div class="rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#008B8B] bg-white p-6 shadow-sm">
-          <div class="border-b border-[#DCE7E2] pb-4 mb-6">
-            <h2 class="text-xl font-bold text-[#008B8B]">Performance &amp; Analytics</h2>
+        <div class="app-panel app-panel--padded">
+          <div class="border-b border-[var(--app-border)] pb-4 mb-6">
+            <h2 class="app-section-title">Performance &amp; Analytics</h2>
             <p class="mt-1 text-sm text-gray-600">Analyze parcel throughput, delivery status distribution, and average turnaround time.</p>
           </div>
 
@@ -27,7 +27,7 @@
                   v-model="form.from"
                   type="date"
                   required
-                  class="mt-2 w-full rounded-lg border border-[#DCE7E2] bg-white px-3 py-2.5 text-sm text-[#333333] outline-none transition focus:border-[#008B8B] focus:ring-2 focus:ring-[#008B8B]/20"
+                  class="mt-2 w-full app-input"
                 />
               </div>
               <div>
@@ -37,26 +37,26 @@
                   v-model="form.to"
                   type="date"
                   required
-                  class="mt-2 w-full rounded-lg border border-[#DCE7E2] bg-white px-3 py-2.5 text-sm text-[#333333] outline-none transition focus:border-[#008B8B] focus:ring-2 focus:ring-[#008B8B]/20"
+                  class="mt-2 w-full app-input"
                 />
               </div>
               <button
                 type="submit"
                 :disabled="loading || !form.from || !form.to"
-                class="rounded-lg bg-[#FFA500] px-6 py-2.5 text-sm font-bold text-white transition hover:bg-[#E69500] disabled:cursor-not-allowed disabled:opacity-50 shadow-sm active:scale-95"
+                class="disabled:cursor-not-allowed disabled:opacity-50 app-button-primary"
               >
                 {{ loading ? 'Generating…' : 'Generate Report' }}
               </button>
             </div>
-            <p class="text-xs text-gray-500">The date filter selects parcels sorted within the specified interval.</p>
+            <p class="text-xs text-[var(--app-text-muted)]">The date filter selects parcels sorted within the specified interval.</p>
           </form>
         </div>
 
         <!-- Feedback Notification -->
         <div
           v-if="feedback.message"
-          :class="feedback.type === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-red-200 bg-red-50 text-red-800'"
-          class="flex items-center justify-between rounded-lg border px-5 py-3 text-sm shadow-sm"
+          :class="feedback.type === 'success' ? 'app-feedback--success' : 'app-feedback--error'"
+          class="app-feedback"
           role="status"
         >
           <span>{{ feedback.message }}</span>
@@ -64,64 +64,64 @@
         </div>
 
         <!-- Report Results Section -->
-        <section v-if="report" class="space-y-6">
+        <section v-if="report" class="space-y-4">
           <!-- Summary Stat Cards -->
-          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#008B8B] bg-white p-6 shadow-sm">
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="app-panel app-panel--padded">
               <p class="text-sm font-semibold text-gray-600">Total Parcels</p>
-              <p class="mt-2 text-4xl font-bold text-[#008B8B]">{{ report.total_parcels_processed }}</p>
-              <p class="mt-2 text-xs text-gray-500 font-medium">{{ report.from }} to {{ report.to }}</p>
+              <p class="mt-2 text-3xl font-bold text-[var(--app-primary)]">{{ report.total_parcels_processed }}</p>
+              <p class="mt-2 text-xs text-[var(--app-text-muted)] font-medium">{{ report.from }} to {{ report.to }}</p>
             </div>
 
-            <div class="rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#28A745] bg-white p-6 shadow-sm">
+            <div class="app-panel app-panel--padded">
               <p class="text-sm font-semibold text-gray-600">Delivered</p>
-              <p class="mt-2 text-4xl font-bold text-[#28A745]">{{ report.status_breakdown?.DELIVERED || 0 }}</p>
-              <p class="mt-2 text-xs text-gray-500 font-medium">Successfully completed</p>
+              <p class="mt-2 text-3xl font-bold text-[var(--app-success)]">{{ report.status_breakdown?.DELIVERED || 0 }}</p>
+              <p class="mt-2 text-xs text-[var(--app-text-muted)] font-medium">Successfully completed</p>
             </div>
 
-            <div class="rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#DC3545] bg-white p-6 shadow-sm">
+            <div class="app-panel app-panel--padded">
               <p class="text-sm font-semibold text-gray-600">Failed / Returned</p>
-              <p class="mt-2 text-4xl font-bold text-[#DC3545]">{{ report.status_breakdown?.FAILED_RETURNED || 0 }}</p>
-              <p class="mt-2 text-xs text-gray-500 font-medium">Undeliverable parcels</p>
+              <p class="mt-2 text-3xl font-bold text-[var(--app-error)]">{{ report.status_breakdown?.FAILED_RETURNED || 0 }}</p>
+              <p class="mt-2 text-xs text-[var(--app-text-muted)] font-medium">Undeliverable parcels</p>
             </div>
 
-            <div class="rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#FFA500] bg-white p-6 shadow-sm">
+            <div class="app-panel app-panel--padded">
               <p class="text-sm font-semibold text-gray-600">Avg. Turnaround</p>
-              <p class="mt-2 text-2xl font-bold text-[#FFA500] leading-tight">{{ report.average_turnaround || '—' }}</p>
-              <p class="mt-2 text-xs text-gray-500 font-medium">Sort to Dispatch time</p>
+              <p class="mt-2 text-2xl font-bold text-[var(--app-secondary)] leading-tight">{{ report.average_turnaround || '—' }}</p>
+              <p class="mt-2 text-xs text-[var(--app-text-muted)] font-medium">Sorting to delivery start</p>
             </div>
           </div>
 
           <!-- Charts Row -->
-          <div class="grid gap-6 lg:grid-cols-2">
+          <div class="grid gap-4 lg:grid-cols-2">
             <!-- Doughnut: Status Distribution -->
-            <div class="rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#008B8B] bg-white p-6 shadow-sm">
-              <h3 class="text-lg font-bold text-[#008B8B] mb-4">Status Distribution</h3>
+            <div class="app-panel app-panel--padded">
+              <h3 class="mb-4 app-section-title">Status Distribution</h3>
               <div class="relative flex items-center justify-center" style="height:280px;">
-                <canvas ref="doughnutCanvas"></canvas>
+                <canvas ref="doughnutCanvas" role="img" aria-label="Parcel status distribution. Exact counts are listed in the status table below."></canvas>
               </div>
             </div>
 
             <!-- Bar: Status Count Comparison -->
-            <div class="rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#FFA500] bg-white p-6 shadow-sm">
-              <h3 class="text-lg font-bold text-[#008B8B] mb-4">Parcel Status Breakdown</h3>
+            <div class="app-panel app-panel--padded">
+              <h3 class="mb-4 app-section-title">Parcel Status Breakdown</h3>
               <div style="height:280px;">
-                <canvas ref="barCanvas"></canvas>
+                <canvas ref="barCanvas" role="img" aria-label="Parcel counts by status. Exact counts are listed in the status table below."></canvas>
               </div>
             </div>
           </div>
 
           <!-- Status Breakdown Table -->
-          <div class="rounded-xl border border-[#DCE7E2] border-l-4 border-l-[#008B8B] bg-white shadow-sm overflow-hidden">
-            <div class="p-6 border-b border-[#DCE7E2]">
-              <h3 class="text-lg font-bold text-[#008B8B]">Parcel Workflow Status Breakdown</h3>
+          <div class="overflow-hidden app-panel">
+            <div class="p-6 border-b border-[var(--app-border)]">
+              <h3 class="app-section-title">Parcel Workflow Status Breakdown</h3>
             </div>
-            <table class="w-full text-sm">
+            <table class="app-data-table">
               <thead>
-                <tr class="bg-[#008B8B] text-white">
-                  <th class="px-6 py-3 text-left font-semibold">Status</th>
-                  <th class="px-6 py-3 text-right font-semibold">Count</th>
-                  <th class="px-6 py-3 text-right font-semibold">% of Total</th>
+                <tr >
+                  <th scope="col" class="text-left">Status</th>
+                  <th scope="col" class="text-right">Count</th>
+                  <th scope="col" class="text-right">% of Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -129,16 +129,16 @@
                   v-for="(status, idx) in statusOrder"
                   :key="status"
                   :class="idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
-                  class="border-b border-[#DCE7E2] last:border-0"
+                  class="border-b border-[var(--app-border)] last:border-0"
                 >
-                  <td class="px-6 py-3.5 font-medium text-gray-700 flex items-center gap-2">
+                  <td class="text-gray-700">
                     <span class="h-2.5 w-2.5 rounded-full flex-shrink-0" :style="{ backgroundColor: statusColors[status] }"></span>
                     {{ formatStatus(status) }}
                   </td>
-                  <td class="px-6 py-3.5 text-right font-bold text-[#008B8B]">
+                  <td class="text-right">
                     {{ report.status_breakdown[status] || 0 }}
                   </td>
-                  <td class="px-6 py-3.5 text-right text-gray-600">
+                  <td class="text-right text-gray-600">
                     {{ report.total_parcels_processed > 0
                         ? Math.round(((report.status_breakdown[status] || 0) / report.total_parcels_processed) * 100)
                         : 0 }}%
@@ -150,16 +150,16 @@
         </section>
 
         <!-- Empty Results -->
-        <div v-else-if="hasSearched && !loading" class="rounded-xl border border-dashed border-[#DCE7E2] bg-white px-6 py-16 text-center shadow-sm">
-          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-50 text-sm font-semibold text-[#008B8B]">None</div>
-          <h2 class="mt-4 text-lg font-bold text-[#008B8B]">No Parcels Found in Date Range</h2>
+        <div v-else-if="hasSearched && !loading" class="text-center app-panel app-empty-state">
+          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-50 text-sm font-semibold text-[var(--app-primary)]">None</div>
+          <h2 class="mt-4 app-section-title">No Parcels Found in Date Range</h2>
           <p class="mt-2 text-sm text-gray-500">Try selecting a different date range to generate the report.</p>
         </div>
 
         <!-- Initial Prompt -->
-        <div v-else-if="!hasSearched && !loading" class="rounded-xl border border-dashed border-[#DCE7E2] bg-white px-6 py-16 text-center shadow-sm">
+        <div v-else-if="!hasSearched && !loading" class="text-center app-panel app-empty-state">
           <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-sm font-semibold">Date Range</div>
-          <h2 class="mt-4 text-lg font-bold text-[#008B8B]">Select a Date Range</h2>
+          <h2 class="mt-4 app-section-title">Select a Date Range</h2>
           <p class="mt-2 text-sm text-gray-500">Choose start and end dates above, then click "Generate Report" to view analytics.</p>
         </div>
       </template>
@@ -193,10 +193,10 @@ export default {
 
     const statusOrder = ['AT_SORTING_CENTER', 'OUT_FOR_DELIVERY', 'DELIVERED', 'FAILED_RETURNED'];
     const statusColors = {
-      AT_SORTING_CENTER: '#008B8B',
-      OUT_FOR_DELIVERY: '#FFA500',
-      DELIVERED: '#28A745',
-      FAILED_RETURNED: '#DC3545',
+      AT_SORTING_CENTER: '#0d7377',
+      OUT_FOR_DELIVERY: '#d97b06',
+      DELIVERED: '#2d6a4f',
+      FAILED_RETURNED: '#c1121f',
     };
 
     // Chart canvas refs
@@ -234,6 +234,7 @@ export default {
             }],
           },
           options: {
+            animation: false,
             responsive: true,
             maintainAspectRatio: false,
             cutout: '62%',
@@ -279,6 +280,7 @@ export default {
             }],
           },
           options: {
+            animation: false,
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
