@@ -74,4 +74,11 @@ Route::middleware(['auth:sanctum', 'sorting_center.approved'])->group(function (
     Route::get('/sorting-center/reports/transactions', [ReportController::class, 'transactions']);
     Route::get('/sorting-center/parcels/{parcelId}/proofs', [DeliveryProofController::class, 'getProofs']);
     Route::get('/sorting-center/proofs/{proofId}', [DeliveryProofController::class, 'getProof']);
+    Route::get('/sorting-center/proofs/{proofId}/file', [DeliveryProofController::class, 'file'])
+        ->name('sorting-center.proofs.file');
+});
+
+// Seller API Routes
+Route::middleware(['auth:sanctum', 'seller'])->prefix('seller')->group(function () {
+    Route::post('/pickup-requests', [App\Http\Controllers\Seller\PickupRequestController::class, 'store']);
 });

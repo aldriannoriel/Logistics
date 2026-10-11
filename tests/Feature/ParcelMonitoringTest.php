@@ -58,13 +58,13 @@ class ParcelMonitoringTest extends TestCase
             ->assertJsonPath('data.data.0.order_id', $parcel->order_id);
     }
 
-    public function test_monitoring_returns_empty_for_pre_arrival_status_filters(): void
+    public function test_monitoring_rejects_pre_arrival_status_filters(): void
     {
         Sanctum::actingAs($this->approvedSortingCenter());
 
         $this->getJson('/api/sorting-center/parcels/monitoring?status=PLACED')
-            ->assertOk()
-            ->assertJsonPath('data.total', 0);
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('status');
     }
 
     private function approvedSortingCenter(): User

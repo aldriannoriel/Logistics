@@ -131,6 +131,7 @@ class ReportController extends Controller
                 'parcels.delivery_municipality',
                 'parcels.sorted_at',
                 'parcels.assigned_at',
+                'parcels.delivered_at',
                 'parcels.assigned_rider_id',
                 'parcels.buyer_id',
                 'parcels.seller_id',
@@ -151,7 +152,7 @@ class ReportController extends Controller
         $data = $parcels->map(function ($parcel) {
             $deliveredAt = null;
             if ($parcel->status === 'DELIVERED') {
-                $deliveredAt = $parcel->assigned_at?->format('Y-m-d H:i:s');
+                $deliveredAt = $parcel->delivered_at?->format('Y-m-d H:i:s');
             }
 
             return [

@@ -11,7 +11,11 @@ class PickupRequestController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $status = $request->query('status', 'pending');
+        $validated = $request->validate([
+            'status' => ['sometimes', 'string', 'in:pending,confirmed'],
+            'page' => ['sometimes', 'integer', 'min:1'],
+        ]);
+        $status = $validated['status'] ?? 'pending';
         $sortingCenterId = $request->user()->sortingCenter->id;
 
         $pickupRequests = PickupRequest::query()
@@ -25,7 +29,8 @@ class PickupRequestController extends Controller
                     ->orWhere('sorting_center_id', $sortingCenterId);
             })
             ->orderByDesc('requested_at')
-            ->get();
+            ->orderByDesc('id')
+            ->paginate(25);
 
         return response()->json([
             'message' => 'Pickup requests retrieved successfully.',
@@ -61,6 +66,14 @@ class PickupRequestController extends Controller
 
             $parcel = $pickupRequest->parcel()->lockForUpdate()->first();
 
+            if (!$parcel) {
+                abort(404, 'The parcel for this pickup request no longer exists.');
+            }
+
+            if (!in_array($parcel->status, ['PENDING_PICKUP', 'PLACED', 'PREPARING'], true)) {
+                abort(422, 'Only parcels awaiting pickup can have their pickup request confirmed.');
+            }
+
             if ($parcel->sorting_center_id !== null
                 && (int) $parcel->sorting_center_id !== (int) $sortingCenterId) {
                 abort(response()->json([
@@ -72,7 +85,11 @@ class PickupRequestController extends Controller
                 'status' => 'confirmed',
                 'sorting_center_id' => $sortingCenterId,
             ]);
-            $parcel->update(['sorting_center_id' => $sortingCenterId]);
+            $parcel->update([
+                'sorting_center_id' => $sortingCenterId,
+                // Normalize legacy requests at the handoff to the rider API.
+                'status' => $parcel->status === 'PENDING_PICKUP' ? 'PLACED' : $parcel->status,
+            ]);
 
             return $pickupRequest->fresh([
                 'parcel:id,order_id,seller_id,status,delivery_province,delivery_municipality,delivery_barangay,delivery_street,delivery_house_number',

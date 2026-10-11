@@ -28,6 +28,7 @@ class Parcel extends Model
         'assigned_rider_id',
         'pickup_rider_id',
         'assigned_at',
+        'delivered_at',
         'failure_reason',
     ];
 
@@ -36,6 +37,7 @@ class Parcel extends Model
         return [
             'sorted_at' => 'datetime',
             'assigned_at' => 'datetime',
+            'delivered_at' => 'datetime',
         ];
     }
 

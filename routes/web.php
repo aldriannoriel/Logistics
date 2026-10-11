@@ -49,3 +49,8 @@ Route::get('/sorting-center/delivery-reports', function () {
 Route::get('/sorting-center/messages', function () {
     return view('sorting-center.messages');
 });
+
+Route::get('/sorting-center/pickup-requests', function () {
+    return view('sorting-center.pickup-requests');
+});
+

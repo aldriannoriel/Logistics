@@ -142,7 +142,7 @@
 </template>
 
 <script>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, onUnmounted, reactive, ref } from 'vue';
 import ScLayout from './ScLayout.vue';
 
 export default {
@@ -157,9 +157,6 @@ export default {
     const loading = ref(false);
     const statusOptions = [
       { value: '', label: 'All monitorable parcels' },
-      { value: 'PLACED', label: 'Placed' },
-      { value: 'PREPARING', label: 'Preparing' },
-      { value: 'PICKED_UP', label: 'Picked up' },
       { value: 'AT_SORTING_CENTER', label: 'At sorting center' },
       { value: 'OUT_FOR_DELIVERY', label: 'Out for delivery' },
       { value: 'DELIVERED', label: 'Delivered' },
@@ -167,8 +164,12 @@ export default {
     ];
     const pagination = reactive({ current_page: 1, last_page: 1, total: 0, prev_page_url: null, next_page_url: null });
     const feedback = reactive({ message: '', type: 'success' });
+    let latestRequest = 0;
+    onUnmounted(() => { latestRequest++; });
 
     async function loadParcels(page = 1) {
+      if (!token.value) return;
+      const requestId = ++latestRequest;
       loading.value = true;
       const params = new URLSearchParams({ page: String(page) });
       if (selectedStatus.value) params.set('status', selectedStatus.value);
@@ -178,7 +179,9 @@ export default {
           headers: { Accept: 'application/json', Authorization: `Bearer ${token.value}` },
         });
         const data = await response.json();
+        if (requestId !== latestRequest) return;
         if (!response.ok) throw new Error(data.message || 'Monitoring data could not be loaded.');
+        if (!Array.isArray(data.data?.data)) throw new Error('Invalid monitoring response.');
         parcels.value = data.data.data || [];
         Object.assign(pagination, {
           current_page: data.data.current_page,
@@ -187,11 +190,13 @@ export default {
           prev_page_url: data.data.prev_page_url,
           next_page_url: data.data.next_page_url,
         });
+        feedback.message = '';
       } catch (error) {
+        if (requestId !== latestRequest) return;
         feedback.message = error.message;
         feedback.type = 'error';
       } finally {
-        loading.value = false;
+        if (requestId === latestRequest) loading.value = false;
       }
     }
 

@@ -111,7 +111,10 @@ class RiderDeliveryController extends Controller
                 ], 422));
             }
 
-            $parcel->update(array_merge(['status' => $status], $attributes));
+            $parcel->update(array_merge([
+                'status' => $status,
+                'delivered_at' => $status === 'DELIVERED' ? now() : null,
+            ], $attributes));
 
             return $parcel->fresh();
         });
@@ -146,7 +149,8 @@ class RiderDeliveryController extends Controller
         }
 
         $file = $request->file('file');
-        $path = $file->store('delivery-proofs', 'public');
+        $path = $file->store('delivery-proofs', 'local');
+        abort_unless($path, 500, 'Delivery proof could not be saved.');
 
         $proof = DeliveryProof::query()->create([
             'parcel_id' => $parcel->id,

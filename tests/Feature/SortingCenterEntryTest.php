@@ -20,10 +20,11 @@ class SortingCenterEntryTest extends TestCase
             ->assertViewIs('sorting-center-registration');
     }
 
-    public function test_the_seven_sorting_center_pages_use_their_matching_views(): void
+    public function test_sorting_center_pages_use_their_matching_views(): void
     {
         $pages = [
             '/sorting-center/dashboard' => 'sorting-center.dashboard',
+            '/sorting-center/pickup-requests' => 'sorting-center.pickup-requests',
             '/sorting-center/order-management' => 'sorting-center.order-management',
             '/sorting-center/delivery-management' => 'sorting-center.delivery-management',
             '/sorting-center/rider-assignment' => 'sorting-center.rider-assignment',
@@ -42,7 +43,6 @@ class SortingCenterEntryTest extends TestCase
     public function test_retired_sorting_center_pages_are_no_longer_routed(): void
     {
         $this->get('/sorting-center/riders')->assertNotFound();
-        $this->get('/sorting-center/pickup-requests')->assertNotFound();
         $this->get('/sorting-center/incoming-parcels')->assertNotFound();
         $this->get('/sorting-center/sorting')->assertNotFound();
         $this->get('/sorting-center/delivery-assignment')->assertNotFound();

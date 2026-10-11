@@ -47,6 +47,21 @@ class ReportTest extends TestCase
             ->assertJsonValidationErrors('to');
     }
 
+    public function test_transactions_use_completion_time_and_leave_legacy_dates_unknown(): void
+    {
+        $center = $this->approvedSortingCenter();
+        $area = Area::create(['sorting_center_id' => $center->sortingCenter->id, 'name' => 'Area A']);
+        $completed = $this->parcel($area, 'DELIVERED', now()->subHours(5), now()->subHours(3));
+        $completed->update(['delivered_at' => now()->subHour()]);
+        $legacy = $this->parcel($area, 'DELIVERED', now()->subHours(4), now()->subHours(2));
+        Sanctum::actingAs($center);
+
+        $response = $this->getJson('/api/sorting-center/reports/transactions')->assertOk();
+        $records = collect($response->json('data'))->keyBy('id');
+        $this->assertSame($completed->delivered_at->format('Y-m-d H:i:s'), $records[$completed->id]['delivered_at']);
+        $this->assertNull($records[$legacy->id]['delivered_at']);
+    }
+
     private function approvedSortingCenter(): User
     {
         $user = User::factory()->create(['role' => 'sorting_center']);

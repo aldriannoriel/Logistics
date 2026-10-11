@@ -70,6 +70,7 @@ export default {
 
     const cards = [
       { key: 'parcels_awaiting_sorting', label: 'Parcels awaiting sorting', destination: 'delivery management', href: '/sorting-center/delivery-management' },
+      { key: 'pickup_requests_pending', label: 'Pending pickup requests', destination: 'pickup requests', href: '/sorting-center/pickup-requests' },
       { key: 'parcels_awaiting_rider_assignment', label: 'Parcels awaiting rider assignment', destination: 'rider assignment', href: '/sorting-center/rider-assignment' },
       { key: 'parcels_out_for_delivery', label: 'Parcels out for delivery', destination: 'delivery monitoring', href: '/sorting-center/delivery-monitoring' },
     ];

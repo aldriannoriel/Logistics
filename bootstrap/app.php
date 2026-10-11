@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'sorting_center.approved' => \App\Http\Middleware\EnsureSortingCenterApproved::class,
             'rider.approved' => \App\Http\Middleware\EnsureRiderApproved::class,
+            'seller' => \App\Http\Middleware\EnsureSeller::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

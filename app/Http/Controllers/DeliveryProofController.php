@@ -6,12 +6,13 @@ use App\Models\DeliveryProof;
 use App\Models\Parcel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DeliveryProofController extends Controller
 {
     public function getProofs(Request $request, int $parcelId): JsonResponse
     {
-        $sortingCenterId = $request->user()->sorting_center?->id;
+        $sortingCenterId = $request->user()->sortingCenter->id;
 
         $parcel = Parcel::query()
             ->where('sorting_center_id', $sortingCenterId)
@@ -24,7 +25,7 @@ class DeliveryProofController extends Controller
 
         $proofs = DeliveryProof::query()
             ->where('parcel_id', $parcelId)
-            ->with(['rider:id,name,email'])
+            ->with(['rider:id,user_id,name', 'rider.user:id,email'])
             ->orderByDesc('captured_at')
             ->get([
                 'id',
@@ -46,7 +47,7 @@ class DeliveryProofController extends Controller
                     'delivery_street' => $parcel->delivery_street,
                     'delivery_house_number' => $parcel->delivery_house_number,
                 ],
-                'proofs' => $proofs,
+                'proofs' => $proofs->map(fn (DeliveryProof $proof) => $this->proofData($proof)),
             ],
         ]);
     }
@@ -54,7 +55,7 @@ class DeliveryProofController extends Controller
     public function getProof(Request $request, int $proofId): JsonResponse
     {
         $proof = DeliveryProof::query()
-            ->with(['parcel', 'rider:id,name,email'])
+            ->with(['parcel', 'rider:id,user_id,name', 'rider.user:id,email'])
             ->whereKey($proofId)
             ->first();
 
@@ -62,26 +63,47 @@ class DeliveryProofController extends Controller
             return response()->json(['message' => 'Proof not found.'], 404);
         }
 
-        $sortingCenterId = $request->user()->sorting_center?->id;
-        if ($proof->parcel->sorting_center_id !== $sortingCenterId) {
+        $sortingCenterId = $request->user()->sortingCenter->id;
+        if (!$proof->parcel || (int) $proof->parcel->sorting_center_id !== (int) $sortingCenterId) {
             return response()->json(['message' => 'Unauthorized access.'], 403);
         }
 
         return response()->json([
             'message' => 'Delivery proof retrieved successfully.',
-            'data' => [
-                'id' => $proof->id,
-                'parcel_id' => $proof->parcel_id,
-                'rider' => [
-                    'id' => $proof->rider->id,
-                    'name' => $proof->rider->name,
-                    'email' => $proof->rider->email,
-                ],
-                'type' => $proof->type,
-                'file_url' => asset('storage/' . $proof->file_path),
-                'notes' => $proof->notes,
-                'captured_at' => $proof->captured_at,
+            'data' => $this->proofData($proof),
+        ]);
+    }
+
+    private function proofData(DeliveryProof $proof): array
+    {
+        return [
+            'id' => $proof->id,
+            'parcel_id' => $proof->parcel_id,
+            'rider' => [
+                'id' => $proof->rider?->id,
+                'name' => $proof->rider?->name,
+                'email' => $proof->rider?->user?->email,
             ],
+            'type' => $proof->type,
+            'file_url' => route('sorting-center.proofs.file', ['proofId' => $proof->id], false),
+            'notes' => $proof->notes,
+            'captured_at' => $proof->captured_at,
+        ];
+    }
+
+    public function file(Request $request, int $proofId)
+    {
+        $proof = DeliveryProof::query()
+            ->whereHas('parcel', fn ($query) => $query->where(
+                'sorting_center_id', $request->user()->sortingCenter->id
+            ))
+            ->findOrFail($proofId);
+
+        abort_unless(Storage::disk('local')->exists($proof->file_path), 404);
+
+        return Storage::disk('local')->response($proof->file_path, null, [
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 }

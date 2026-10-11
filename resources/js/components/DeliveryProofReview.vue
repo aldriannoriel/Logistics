@@ -4,19 +4,20 @@
       <h2>Delivery Proof Review</h2>
       <div class="parcel-info" v-if="parcel">
         <p><strong>Order:</strong> {{ parcel.order_id }}</p>
-        <p><strong>Status:</strong> <span class="badge" :class="'badge-' + parcel.status.toLowerCase()">{{ parcel.status }}</span></p>
+        <p><strong>Status:</strong> <span class="badge" :class="'badge-' + (parcel.status || 'unknown').toLowerCase()">{{ parcel.status }}</span></p>
         <p><strong>Address:</strong> {{ parcel.delivery_street }}, {{ parcel.delivery_house_number }}</p>
       </div>
     </div>
 
     <div v-if="loading" class="loading">Loading proofs...</div>
+    <div v-else-if="errorMessage" role="alert">{{ errorMessage }}</div>
     <div v-else-if="proofs.length === 0" class="no-proofs"><p>No delivery proofs uploaded yet.</p></div>
 
     <div v-else class="proofs-list">
       <div v-for="proof in proofs" :key="proof.id" class="proof-card">
         <div class="proof-header-item">
           <div class="proof-type">
-            <span class="badge" :class="'badge-' + proof.type.toLowerCase()">{{ proof.type }}</span>
+            <span class="badge" :class="'badge-' + (proof.type || 'unknown').toLowerCase()">{{ proof.type }}</span>
           </div>
           <div class="proof-rider">
             <p><strong>Captured by:</strong> {{ proof.rider?.name }}</p>
@@ -24,54 +25,51 @@
           </div>
         </div>
         <div class="proof-content">
-          <img v-if="proof.type === 'PHOTO'" :src="getProofUrl(proof)" alt="Delivery proof" class="proof-image" />
-          <div v-else class="signature-placeholder">Signature Proof</div>
+          <protected-proof-image :file-url="proof.file_url" :token="token" />
         </div>
         <div v-if="proof.notes" class="proof-notes">
           <p><strong>Notes:</strong> {{ proof.notes }}</p>
         </div>
-        <button @click="viewFullProof(proof.id)" class="btn-view">View Full Proof</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import ProtectedProofImage from './ProtectedProofImage.vue';
 export default {
   name: 'DeliveryProofReview',
+  components: { ProtectedProofImage },
   props: {
     parcelId: { type: Number, required: true },
     apiUrl: { type: String, required: true },
     token: { type: String, required: true },
   },
   data() {
-    return { proofs: [], parcel: null, loading: true };
+    return { proofs: [], parcel: null, loading: true, errorMessage: '' };
   },
   mounted() { this.fetchProofs(); },
   methods: {
     async fetchProofs() {
       this.loading = true;
+      this.errorMessage = '';
       try {
         const response = await fetch(`${this.apiUrl}/sorting-center/parcels/${this.parcelId}/proofs`, { headers: { Authorization: `Bearer ${this.token}` } });
         if (!response.ok) throw new Error('Failed to fetch proofs');
         const data = await response.json();
-        this.proofs = data.data.proofs;
-        this.parcel = data.data.parcel;
+        this.proofs = Array.isArray(data.data?.proofs) ? data.data.proofs : [];
+        this.parcel = data.data?.parcel ?? null;
       } catch (error) {
         console.error('Error:', error);
         this.proofs = [];
+        this.parcel = null;
+        this.errorMessage = 'Delivery proofs could not be loaded. Please try again.';
       } finally {
         this.loading = false;
       }
     },
-    getProofUrl(proof) {
-      return proof.file_path.startsWith('http') ? proof.file_path : `${this.apiUrl}/storage/${proof.file_path}`;
-    },
     formatDate(dateString) {
       return dateString ? new Date(dateString).toLocaleString() : '';
-    },
-    viewFullProof(proofId) {
-      this.$emit('view-proof', proofId);
     },
   },
 };

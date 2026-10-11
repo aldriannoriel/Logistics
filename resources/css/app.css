@@ -1,23 +1,6 @@
-@import 'tailwindcss';
-
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-
-@theme {
-    --font-sans: 'Inter', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
-    --color-primary: #0d7377;
-    --color-primary-strong: #066268;
-    --color-secondary: #d97b06;
-    --color-success: #2d6a4f;
-    --color-warning: #f77f00;
-    --color-error: #c1121f;
-    --color-neutral-50: #f5f7fa;
-    --color-neutral-100: #f8fafc;
-    --color-neutral-200: #e2e8f0;
-    --color-neutral-300: #cbd5e0;
-    --color-neutral-700: #4a5568;
-    --color-neutral-900: #1a202c;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
     --app-primary: #0d7377;

@@ -9,9 +9,12 @@ use Illuminate\Support\Facades\DB;
 
 class RiderPickupController extends Controller
 {
-    public function available(): JsonResponse
+    public function available(Request $request): JsonResponse
     {
+        $centerId = $request->user()->rider->sorting_center_id;
+        abort_unless($centerId, 403, 'A sorting center assignment is required for pickups.');
         $pickups = Parcel::query()
+            ->where('sorting_center_id', $centerId)
             ->with([
                 'pickupRequests' => fn ($query) => $query
                     ->where('status', 'confirmed')
@@ -73,11 +76,13 @@ class RiderPickupController extends Controller
     public function accept(Request $request, int $parcelId): JsonResponse
     {
         $riderId = $request->user()->rider?->id;
+        $centerId = $request->user()->rider->sorting_center_id;
+        abort_unless($centerId, 403, 'A sorting center assignment is required for pickups.');
 
-        $parcel = DB::transaction(function () use ($parcelId, $riderId): Parcel {
+        $parcel = DB::transaction(function () use ($parcelId, $riderId, $centerId): Parcel {
             $parcel = Parcel::query()->whereKey($parcelId)->lockForUpdate()->first();
 
-            if (!$parcel) {
+            if (!$parcel || (int) $parcel->sorting_center_id !== (int) $centerId) {
                 abort(response()->json(['message' => 'Pickup job not found.'], 404));
             }
 

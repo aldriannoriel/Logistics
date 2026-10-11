@@ -31,9 +31,9 @@ class PickupRequestApprovalTest extends TestCase
 
         $this->getJson('/api/sorting-center/pickup-requests?status=pending')
             ->assertOk()
-            ->assertJsonPath('data.0.id', $pickupRequest->id)
-            ->assertJsonPath('data.0.parcel.order_id', 'TEST-ORDER-0001')
-            ->assertJsonPath('data.0.seller.email', $seller->email);
+            ->assertJsonPath('data.data.0.id', $pickupRequest->id)
+            ->assertJsonPath('data.data.0.parcel.order_id', 'TEST-ORDER-0001')
+            ->assertJsonPath('data.data.0.seller.email', $seller->email);
     }
 
     public function test_confirming_request_assigns_it_to_the_sorting_center(): void
@@ -94,6 +94,28 @@ class PickupRequestApprovalTest extends TestCase
         $user->load('sortingCenter');
 
         return $user;
+    }
+
+    public function test_pickup_list_is_paginated_and_rejects_invalid_filters(): void
+    {
+        $center = $this->approvedSortingCenter();
+        $seller = User::factory()->create(['role' => 'seller']);
+        $buyer = User::factory()->create(['role' => 'buyer']);
+        $parcel = $this->parcel($seller, $buyer);
+        for ($i = 0; $i < 26; $i++) {
+            PickupRequest::create([
+                'parcel_id' => $parcel->id, 'seller_id' => $seller->id, 'status' => 'pending',
+            ]);
+        }
+        Sanctum::actingAs($center);
+        $this->getJson('/api/sorting-center/pickup-requests')
+            ->assertOk()->assertJsonCount(25, 'data.data')->assertJsonPath('data.total', 26);
+        $this->getJson('/api/sorting-center/pickup-requests?page=2')
+            ->assertOk()->assertJsonCount(1, 'data.data')->assertJsonPath('data.current_page', 2);
+        $this->getJson('/api/sorting-center/pickup-requests?status=invalid')
+            ->assertUnprocessable()->assertJsonValidationErrors('status');
+        $this->getJson('/api/sorting-center/pickup-requests?page=0')
+            ->assertUnprocessable()->assertJsonValidationErrors('page');
     }
 
     private function parcel(User $seller, User $buyer): Parcel

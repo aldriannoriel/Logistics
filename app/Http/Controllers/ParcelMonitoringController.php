@@ -10,9 +10,6 @@ use Illuminate\Validation\Rule;
 class ParcelMonitoringController extends Controller
 {
     private const FILTERABLE_STATUSES = [
-        'PLACED',
-        'PREPARING',
-        'PICKED_UP',
         'AT_SORTING_CENTER',
         'OUT_FOR_DELIVERY',
         'DELIVERED',

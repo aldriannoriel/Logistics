@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 export default {
   name: 'ScLayout',
@@ -67,6 +67,7 @@ export default {
       { path: '/sorting-center/dashboard', label: 'Dashboard' },
       { path: '/sorting-center/order-management', label: 'Order Management' },
       { path: '/sorting-center/delivery-management', label: 'Delivery Management' },
+      { path: '/sorting-center/pickup-requests', label: 'Pickup Requests' },
       { path: '/sorting-center/rider-assignment', label: 'Rider Assignment' },
       { path: '/sorting-center/delivery-monitoring', label: 'Delivery Monitoring' },
       { path: '/sorting-center/delivery-reports', label: 'Delivery Reports' },
@@ -104,6 +105,7 @@ export default {
           localStorage.removeItem('auth_session');
           localStorage.removeItem('token');
           localStorage.removeItem('sortingCenterId');
+          localStorage.removeItem('sortingCenterName');
           window.location.href = '/sorting-center/login';
         } catch (error) {
           console.error('Logout error:', error);
@@ -111,9 +113,12 @@ export default {
       }
     };
 
+    let interval;
+    onUnmounted(() => clearInterval(interval));
+
     onMounted(() => {
       updateDateTime();
-      const interval = setInterval(updateDateTime, 60000);
+      interval = setInterval(updateDateTime, 60000);
 
       const sessionStr = localStorage.getItem('auth_session');
       if (sessionStr) {
@@ -131,7 +136,6 @@ export default {
       const storedName = localStorage.getItem('sortingCenterName');
       if (storedName) userName.value = storedName;
 
-      return () => clearInterval(interval);
     });
 
     return {

@@ -17,6 +17,7 @@ class RiderDeliveryCompletionTest extends TestCase
 
     public function test_rider_can_mark_an_assigned_delivery_as_delivered(): void
     {
+        $this->freezeTime();
         [$user, $rider] = $this->riderUser();
         $parcel = $this->parcel($rider->id);
         DeliveryProof::create([
@@ -36,7 +37,75 @@ class RiderDeliveryCompletionTest extends TestCase
         $this->assertDatabaseHas('parcels', [
             'id' => $parcel->id,
             'status' => 'DELIVERED',
+            'delivered_at' => now()->format('Y-m-d H:i:s'),
         ]);
+    }
+
+    public function test_sorting_center_can_read_proofs_with_rider_email_and_storage_url(): void
+    {
+        [$user, $rider] = $this->riderUser();
+        $parcel = $this->parcel($rider->id);
+        $parcel->update(['sorting_center_id' => $rider->sorting_center_id]);
+        $proof = DeliveryProof::create([
+            'parcel_id' => $parcel->id, 'rider_id' => $rider->id,
+            'type' => 'PHOTO', 'file_path' => 'delivery-proofs/test.jpg',
+            'captured_at' => now(),
+        ]);
+        Sanctum::actingAs($rider->sortingCenter->user);
+
+        $url = route('sorting-center.proofs.file', ['proofId' => $proof->id], false);
+        $this->getJson("/api/sorting-center/parcels/{$parcel->id}/proofs")
+            ->assertOk()
+            ->assertJsonPath('data.proofs.0.rider.email', $user->email)
+            ->assertJsonPath('data.proofs.0.file_url', $url);
+        $this->getJson("/api/sorting-center/proofs/{$proof->id}")
+            ->assertOk()
+            ->assertJsonPath('data.rider.email', $user->email)
+            ->assertJsonPath('data.file_url', $url);
+
+        [, $otherRider] = $this->riderUser();
+        Sanctum::actingAs($otherRider->sortingCenter->user);
+        $this->getJson("/api/sorting-center/parcels/{$parcel->id}/proofs")->assertNotFound();
+        $this->getJson("/api/sorting-center/proofs/{$proof->id}")->assertForbidden();
+    }
+
+    public function test_proof_files_require_authentication_and_center_ownership(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('local');
+        [$user, $rider] = $this->riderUser();
+        $parcel = $this->parcel($rider->id);
+        $parcel->update(['sorting_center_id' => $rider->sorting_center_id]);
+        $path = 'delivery-proofs/private.jpg';
+        \Illuminate\Support\Facades\Storage::disk('local')->put($path, 'private proof bytes');
+        $proof = DeliveryProof::create([
+            'parcel_id' => $parcel->id, 'rider_id' => $rider->id,
+            'type' => 'PHOTO', 'file_path' => $path, 'captured_at' => now(),
+        ]);
+        $url = route('sorting-center.proofs.file', ['proofId' => $proof->id], false);
+        $this->getJson($url)->assertUnauthorized();
+        Sanctum::actingAs($rider->sortingCenter->user);
+        $this->get($url)->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->getJson("/api/sorting-center/proofs/{$proof->id}")
+            ->assertOk()->assertJsonMissingPath('data.file_path');
+        [, $other] = $this->riderUser();
+        Sanctum::actingAs($other->sortingCenter->user);
+        $this->getJson($url)->assertNotFound();
+    }
+
+    public function test_uploaded_proofs_are_stored_privately(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('local');
+        \Illuminate\Support\Facades\Storage::fake('public');
+        [$user, $rider] = $this->riderUser();
+        $parcel = $this->parcel($rider->id);
+        Sanctum::actingAs($user);
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aQ1sAAAAASUVORK5CYII=');
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('proof.png', $png);
+        $response = $this->postJson("/api/rider/deliveries/{$parcel->id}/upload-proof", ['file' => $file])
+            ->assertCreated();
+        $path = $response->json('data.file_path');
+        \Illuminate\Support\Facades\Storage::disk('local')->assertExists($path);
+        \Illuminate\Support\Facades\Storage::disk('public')->assertMissing($path);
     }
 
     public function test_rider_must_upload_proof_before_marking_delivery_as_delivered(): void
